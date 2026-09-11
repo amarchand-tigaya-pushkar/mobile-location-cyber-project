@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cyber Location Investigation Simulator</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+#dashboard {
+    background: #f1f5f9 !important;
+    min-height: 100vh !important;
+}
+
+#dashboard .header {
+    background: #fff !important;
+    color: #0f2a68 !important;
+    min-height: 90px !important;
+    padding: 20px 30px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    box-shadow: 0 3px 12px rgba(15,23,42,.08) !important;
+}
+
+#dashboard .header h1 {
+    color: #0f2a68 !important;
+    margin: 0 !important;
+}
+
+#dashboard .header p {
+    color: #64748b !important;
+}
+
+#dashboard .container {
+    max-width: 1200px !important;
+    margin: auto !important;
+    padding: 20px !important;
+}
+
+#dashboard .card {
+    background: #fff !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    margin-bottom: 20px !important;
+    box-shadow: 0 5px 18px rgba(15,23,42,.08) !important;
+}
+
+#dashboard .card h2 {
+    color: #0f2a68 !important;
+}
+
+#dashboard .search-row {
+    display: flex !important;
+    gap: 10px !important;
+}
+
+#dashboard .search-row input {
+    flex: 1 !important;
+    height: 44px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 0 12px !important;
+}
+
+#dashboard .search-row button {
+    width: auto !important;
+    height: 44px !important;
+    padding: 0 18px !important;
+    background: #2563eb !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+}
+
+#dashboard #userSelect {
+    width: 100% !important;
+    height: 44px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 0 12px !important;
+}
+
+#dashboard #loadBtn {
+    width: 100% !important;
+    height: 44px !important;
+    background: #2563eb !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+}
+
+@media (max-width: 768px) {
+    #dashboard .header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    #dashboard .search-row {
+        flex-direction: column !important;
+    }
+
+    #dashboard .search-row input,
+    #dashboard .search-row button {
+        width: 100% !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     LOGIN
+========================================================= -->
+
+<!-- =========================================================
+     PROFESSIONAL INVESTIGATOR LOGIN
+========================================================= -->
+
+<div
+    id="loginPanel"
+    style="
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 20px;
+
+        background:
+            radial-gradient(
+                circle at top left,
+                #dbeafe 0%,
+                #eff6ff 35%,
+                #f8fafc 70%,
+                #e2e8f0 100%
+            );
+    "
+>
+
+    <div
+        class="login-box"
+        style="
+            width: 420px;
+            max-width: 100%;
+            box-sizing: border-box;
+
+            padding: 36px;
+
+            background: #ffffff;
+
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+
+            box-shadow:
+                0 25px 60px rgba(15, 23, 42, 0.15),
+                0 8px 25px rgba(15, 23, 42, 0.08);
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+        "
+    >
+
+        <!-- Logo -->
+        <div
+            style="
+                width: 64px;
+                height: 64px;
+
+                margin: 0 auto 18px;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                background: #eff6ff;
+
+                border-radius: 16px;
+
+                font-size: 32px;
+
+                box-shadow:
+                    inset 0 0 0 1px #dbeafe;
+            "
+        >
+            🔐
+        </div>
+
+
+        <!-- Heading -->
+        <h2
+            style="
+                margin: 0;
+
+                text-align: center;
+
+                color: #0f172a;
+
+                font-size: 26px;
+                font-weight: 700;
+                line-height: 1.3;
+            "
+        >
+            Investigator Login
+        </h2>
+
+
+        <!-- Subtitle -->
+        <p
+            style="
+                margin: 8px 0 28px;
+
+                text-align: center;
+
+                color: #64748b;
+
+                font-size: 14px;
+                line-height: 1.5;
+            "
+        >
+            Cyber Location Investigation Simulator
+        </p>
+
+
+        <!-- Username Label -->
+        <label
+            for="investigatorUsername"
+            style="
+                display: block;
+
+                margin-bottom: 7px;
+
+                color: #334155;
+
+                font-size: 13px;
+                font-weight: 600;
+            "
+        >
+            👤 Username
+        </label>
+
+
+        <!-- Username -->
+        <input
+            type="text"
+            id="investigatorUsername"
+            placeholder="Enter investigator username"
+            autocomplete="username"
+
+            style="
+                width: 100%;
+                height: 46px;
+
+                box-sizing: border-box;
+
+                padding: 0 14px;
+
+                margin-bottom: 18px;
+
+                border: 1px solid #cbd5e1;
+                border-radius: 10px;
+
+                background: #f8fafc;
+
+                color: #0f172a;
+
+                font-size: 14px;
+
+                outline: none;
+            "
+        >
+
+
+        <!-- Password Label -->
+        <label
+            for="investigatorPassword"
+            style="
+                display: block;
+
+                margin-bottom: 7px;
+
+                color: #334155;
+
+                font-size: 13px;
+                font-weight: 600;
+            "
+        >
+            🔑 Password
+        </label>
+
+
+        <!-- Password -->
+        <input
+            type="password"
+            id="investigatorPassword"
+            placeholder="Enter investigator password"
+            autocomplete="current-password"
+
+            style="
+                width: 100%;
+                height: 46px;
+
+                box-sizing: border-box;
+
+                padding: 0 14px;
+
+                margin-bottom: 20px;
+
+                border: 1px solid #cbd5e1;
+                border-radius: 10px;
+
+                background: #f8fafc;
+
+                color: #0f172a;
+
+                font-size: 14px;
+
+                outline: none;
+            "
+        >
+
+
+        <!-- Login Button -->
+        <button
+            type="button"
+            onclick="investigatorLogin()"
+
+            style="
+                width: 100%;
+                height: 48px;
+
+                border: none;
+                border-radius: 10px;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        #2563eb,
+                        #1d4ed8
+                    );
+
+                color: #ffffff;
+
+                font-size: 15px;
+                font-weight: 700;
+
+                cursor: pointer;
+
+                box-shadow:
+                    0 8px 18px
+                    rgba(37, 99, 235, 0.25);
+
+                transition:
+                    transform 0.2s ease,
+                    box-shadow 0.2s ease;
+            "
+        >
+            🔑 &nbsp; Login
+        </button>
+
+
+        <!-- Login Message -->
+        <div
+            id="loginMessage"
+            style="
+                margin-top: 12px;
+
+                text-align: center;
+
+                font-size: 13px;
+                font-weight: 600;
+            "
+        ></div>
+
+
+        <!-- Demo Login -->
+        <div
+            class="login-demo"
+
+            style="
+                margin-top: 24px;
+
+                padding: 15px;
+
+                background: #f8fafc;
+
+                border: 1px solid #e2e8f0;
+
+                border-radius: 10px;
+
+                color: #475569;
+
+                font-size: 12px;
+
+                line-height: 1.7;
+            "
+        >
+
+            <div
+                style="
+                    margin-bottom: 5px;
+
+                    color: #0f172a;
+
+                    font-size: 13px;
+                    font-weight: 700;
+                "
+            >
+                🧪 Demo Login
+            </div>
+
+            <div>
+                Username:
+                <code
+                    style="
+                        color: #1d4ed8;
+                        font-weight: 600;
+                    "
+                >investigator</code>
+            </div>
+
+            <div>
+                Password:
+                <code
+                    style="
+                        color: #1d4ed8;
+                        font-weight: 600;
+                    "
+                >Cyber@123</code>
+            </div>
+
+        </div>
+
+
+        <!-- Educational Warning -->
+        <div
+            style="
+                margin-top: 16px;
+
+                padding: 10px 12px;
+
+                background: #fff7ed;
+
+                border: 1px solid #fed7aa;
+
+                border-radius: 8px;
+
+                color: #9a3412;
+
+                font-size: 11px;
+
+                text-align: center;
+            "
+        >
+            ⚠️ Educational simulator only.
+            <br>
+            All location data is fictional/simulated.
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =========================================================
+     DASHBOARD
+========================================================= -->
+
+<div id="dashboard">
+
+    <!-- HEADER -->
+
+    <header class="header">
+
+        <div>
+            <h1>🔐 Cyber Location Investigation Simulator</h1>
+
+            <p>
+                Educational / Simulated Investigation Dashboard
+            </p>
+        </div>
+
+        <div class="status">
+            <span class="dot"></span>
+            API Connected
+        </div>
+
+    </header>
+
+
+    <!-- TOOLBAR -->
+
+    <div class="dashboard-toolbar">
+
+        <button
+            type="button"
+            class="toolbar-btn"
+            id="newCaseBtn"
+        >
+            ➕ New Case
+        </button>
+
+        <button
+            type="button"
+            class="toolbar-btn"
+            id="logoutBtn"
+        >
+            🚪 Logout
+        </button>
+
+    </div>
+
+
+    <main class="container">
+
+
+        <!-- =================================================
+             CASE INFORMATION
+        ================================================== -->
+
+        <section
+            id="caseSection"
+            class="card"
+        >
+
+            <h2>📁 Investigation Case</h2>
+
+            <div class="case-grid">
+
+                <div class="case-box">
+                    <span>Case ID</span>
+                    <strong id="caseIdDisplay">-</strong>
+                </div>
+
+                <div class="case-box">
+                    <span>Status</span>
+                    <strong id="caseStatus">OPEN</strong>
+                </div>
+
+            </div>
+
+            <div class="case-actions">
+
+                <button
+                    type="button"
+                    id="closeCaseBtn"
+                >
+                    🔒 Close Case
+                </button>
+
+                <button
+                    type="button"
+                    id="newCaseBtn2"
+                >
+                    🆕 New Case
+                </button>
+
+            </div>
+
+            <div id="evidenceLog">
+
+                <div class="evidence-item">
+                    <span>📋</span>
+
+                    <span>
+                        No evidence events recorded.
+                    </span>
+
+                    <small>-</small>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SEARCH USER / PHONE
+        ================================================== -->
+
+        <section
+            id="searchSection"
+            class="card search-section"
+        >
+
+            <h2>🔎 Search User / Phone</h2>
+
+            <div class="search-row">
+
+                <input
+                    type="text"
+                    id="userSearchInput"
+                    placeholder="Enter simulated user name, phone, or User ID"
+                    autocomplete="off"
+                >
+
+                <button
+                    type="button"
+                    id="userSearchBtn"
+                >
+                    🔍 Search
+                </button>
+
+            </div>
+
+            <div
+                id="userSearchResults"
+                class="search-results"
+            ></div>
+
+        </section>
+
+
+        <!-- =================================================
+             USER SELECTION
+        ================================================== -->
+
+        <section class="card">
+
+            <h2>👤 Select Simulated User</h2>
+
+            <select id="userSelect">
+
+                <option value="">
+                    Loading users...
+                </option>
+
+            </select>
+
+            <button
+                type="button"
+                id="loadBtn"
+            >
+                🔍 Investigate Location
+            </button>
+
+        </section>
+
+
+        <!-- =================================================
+             USER INFORMATION
+        ================================================== -->
+
+        <section
+            id="userInfo"
+            class="card hidden"
+        >
+
+            <h2>📱 User Information</h2>
+
+            <div class="info-grid">
+
+                <div>
+                    <span>Name</span>
+                    <strong id="userName">-</strong>
+                </div>
+
+                <div>
+                    <span>Phone</span>
+                    <strong id="userPhone">-</strong>
+                </div>
+
+                <div>
+                    <span>User ID</span>
+                    <strong id="userId">-</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             LATEST LOCATION
+        ================================================== -->
+
+        <section
+            id="latestLocationSection"
+            class="card hidden"
+        >
+
+            <h2>🎯 Latest Simulated Location</h2>
+
+            <div
+                id="latestLocationBox"
+                class="latest-location-box"
+            ></div>
+
+        </section>
+
+
+        <!-- =================================================
+             INVESTIGATION SUMMARY
+        ================================================== -->
+
+        <section
+            id="summarySection"
+            class="card hidden"
+        >
+
+            <h2>📊 Investigation Summary</h2>
+
+            <div class="summary-grid">
+
+                <div class="summary-box">
+                    <span>📍 Total Locations</span>
+                    <strong id="totalLocations">0</strong>
+                </div>
+
+                <div class="summary-box">
+                    <span>🗼 Towers Visited</span>
+                    <strong id="towersVisited">0</strong>
+                </div>
+
+                <div class="summary-box">
+                    <span>🕐 First Seen</span>
+                    <strong id="firstSeen">-</strong>
+                </div>
+
+                <div class="summary-box">
+                    <span>🕐 Last Seen</span>
+                    <strong id="lastSeen">-</strong>
+                </div>
+
+                <div class="summary-box">
+                    <span>📌 Latest Tower</span>
+                    <strong id="latestTower">-</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             MOVEMENT ANALYSIS
+        ================================================== -->
+
+        <section
+            id="movementSection"
+            class="card hidden"
+        >
+
+            <h2>📈 Movement Analysis</h2>
+
+            <div class="info-grid">
+
+                <div>
+                    <span>🎯 Latest Location</span>
+                    <strong id="latestCoordinates">-</strong>
+                </div>
+
+                <div>
+                    <span>🗼 Latest Tower</span>
+                    <strong id="movementTower">-</strong>
+                </div>
+
+                <div>
+                    <span>📏 Distance Travelled</span>
+                    <strong id="movementDistance">-</strong>
+                </div>
+
+                <div>
+                    <span>🧭 Movement Direction</span>
+                    <strong id="movementDirection">-</strong>
+                </div>
+
+                <div>
+                    <span>⏱️ Investigation Duration</span>
+                    <strong id="investigationDuration">-</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SPEED ANALYSIS
+        ================================================== -->
+
+        <section
+            id="speedSection"
+            class="card hidden"
+        >
+
+            <h2>⚡ Speed Analysis</h2>
+
+            <div class="info-grid">
+
+                <div>
+                    <span>⚡ Average Speed</span>
+                    <strong id="averageSpeed">-</strong>
+                </div>
+
+                <div>
+                    <span>🚀 Maximum Speed</span>
+                    <strong id="maximumSpeed">-</strong>
+                </div>
+
+                <div>
+                    <span>📏 Total Distance</span>
+                    <strong id="speedDistance">-</strong>
+                </div>
+
+                <div>
+                    <span>⏱️ Duration</span>
+                    <strong id="speedDuration">-</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             INVESTIGATION TIMELINE
+        ================================================== -->
+
+        <section
+            id="timelineSection"
+            class="card hidden"
+        >
+
+            <h2>🕐 Investigation Timeline</h2>
+
+            <div
+                id="timelineContainer"
+                class="timeline-container"
+            ></div>
+
+        </section>
+
+
+        <!-- =================================================
+             STATISTICS
+        ================================================== -->
+
+        <section
+            id="statisticsSection"
+            class="card hidden"
+        >
+
+            <h2>📊 Investigation Statistics</h2>
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <span>📍 Total Locations</span>
+                    <strong id="statLocations">-</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>🗼 Towers Visited</span>
+                    <strong id="statTowers">-</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>📏 Total Distance</span>
+                    <strong id="statDistance">-</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>⚡ Average Speed</span>
+                    <strong id="statAverageSpeed">-</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>🚀 Maximum Speed</span>
+                    <strong id="statMaximumSpeed">-</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>⏱️ Duration</span>
+                    <strong id="statDuration">-</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>🎯 Latest Tower</span>
+                    <strong id="statLatestTower">-</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>🧭 Direction</span>
+                    <strong id="statDirection">-</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             MOVEMENT CHART
+        ================================================== -->
+
+        <section
+            id="movementChartSection"
+            class="card hidden"
+        >
+
+            <h2>📈 Movement Chart</h2>
+
+            <div class="chart-info">
+
+                <span>📍 Location Movement</span>
+
+                <span>📏 Distance vs Time</span>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="movementChart"></canvas>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             EVENT DETAILS
+        ================================================== -->
+
+        <section
+            id="eventDetailsSection"
+            class="card hidden"
+        >
+
+            <h2>🔎 Investigation Event Details</h2>
+
+            <div
+                id="eventDetailsContainer"
+                class="event-details"
+            ></div>
+
+        </section>
+
+
+        <!-- =================================================
+             REPORT
+        ================================================== -->
+
+        <section
+            id="reportSection"
+            class="card hidden"
+        >
+
+            <h2>📄 Investigation Report</h2>
+
+            <div class="report-actions">
+
+                <button
+                    type="button"
+                    id="generateReportBtn"
+                >
+                    📋 Generate Report
+                </button>
+
+                <button
+                    type="button"
+                    id="exportCsvBtn"
+                >
+                    📥 Export CSV
+                </button>
+
+                <button
+                    type="button"
+                    id="printReportBtn"
+                >
+                    🖨️ Print Report
+                </button>
+
+            </div>
+
+            <div
+                id="reportContainer"
+                class="report-container"
+            ></div>
+
+        </section>
+
+
+        <!-- =================================================
+             LOCATION HISTORY
+        ================================================== -->
+
+        <section
+            id="locationSection"
+            class="card hidden"
+        >
+
+            <h2>📍 Simulated Location History</h2>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>#</th>
+                            <th>Tower</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                            <th>Accuracy</th>
+                            <th>Recorded At</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="locationTable"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             MAP
+        ================================================== -->
+
+        <section
+            id="mapSection"
+            class="card hidden"
+        >
+
+            <h2>🗺️ Simulated Location Map</h2>
+
+            <div id="map"></div>
+
+        </section>
+
+
+        <!-- =================================================
+             TOWER INFORMATION
+        ================================================== -->
+
+        <section
+            id="towerSection"
+            class="card hidden"
+        >
+
+            <h2>🗼 Tower Information</h2>
+
+            <div
+                id="towerContainer"
+                class="tower-grid"
+            ></div>
+
+        </section>
+
+
+        <!-- MESSAGE -->
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <p>
+            ⚠️ Educational simulator using
+            fictional/simulated location data.
+        </p>
+
+    </footer>
+
+</div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
