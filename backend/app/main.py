@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from .routes.auth_routes import router as auth_router
 from .config import (
     APP_NAME,
     APP_VERSION,
@@ -48,7 +48,7 @@ app.add_middleware(
 app.include_router(
     location_router
 )
-
+app.include_router(auth_router)
 
 # =========================================================
 # HEALTH / HOME

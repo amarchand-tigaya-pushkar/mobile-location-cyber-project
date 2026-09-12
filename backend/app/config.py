@@ -76,3 +76,11 @@ PORT = int(
         "8000"
     )
 )
+INVESTIGATOR_USERNAME = os.getenv(
+    "INVESTIGATOR_USERNAME",
+    "investigator"
+)
+
+INVESTIGATOR_PASSWORD_HASH = os.getenv(
+    "INVESTIGATOR_PASSWORD_HASH"
+)
