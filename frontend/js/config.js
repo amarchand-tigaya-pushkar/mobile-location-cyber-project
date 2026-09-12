@@ -4,4 +4,4 @@
 // =========================================================
 
 window.SIMULATOR_API_URL =
-    "http://127.0.0.1:8000";
+    "https://mobile-location-cyber-project.onrender.com";
