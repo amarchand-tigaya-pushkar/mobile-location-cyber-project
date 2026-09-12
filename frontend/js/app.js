@@ -173,7 +173,7 @@ async function apiFetch(
 
 
     const response =
-        await fetch(
+        await apifetch(
             url,
             {
                 ...options,
@@ -281,7 +281,7 @@ async function investigatorLogin() {
         ----------------------------------------- */
 
         const response =
-            await fetch(
+            await apifetch(
                 `${API_URL}/api/auth/login`,
                 {
                     method: "POST",
