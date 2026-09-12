@@ -2805,6 +2805,10 @@ function updateEventDetails(
    REPORT
 ========================================================= */
 
+/* =========================================================
+   REPORT
+========================================================= */
+
 function generateInvestigationReport() {
 
     const container =
@@ -2813,6 +2817,7 @@ function generateInvestigationReport() {
     if (!container) {
         return;
     }
+
 
     if (
         !currentUser ||
@@ -2832,6 +2837,10 @@ function generateInvestigationReport() {
     const locations =
         currentLocations;
 
+
+    /* =====================================================
+       BASIC CALCULATIONS
+    ===================================================== */
 
     const totalDistance =
         calculateTotalDistance(
@@ -2863,7 +2872,103 @@ function generateInvestigationReport() {
         ).size;
 
 
+    /* =====================================================
+       FIRST / LAST
+    ===================================================== */
+
+    const firstLocation =
+        locations[0];
+
+
+    const firstTower =
+        currentTowers.find(
+            tower =>
+                String(tower.id) ===
+                String(
+                    firstLocation.tower_id
+                )
+        );
+
+
+    const latestTower =
+        currentTowers.find(
+            tower =>
+                String(tower.id) ===
+                String(
+                    latest.tower_id
+                )
+        );
+
+
+    const latestTowerName =
+        latestTower
+            ? latestTower.tower_id
+            : getTowerName(
+                latest.tower_id
+            );
+
+
+    const latestTowerArea =
+        latestTower
+            ? latestTower.area
+            : "N/A";
+
+
+    /* =====================================================
+       MOVEMENT
+    ===================================================== */
+
+    let movementDirection =
+        "Start Point";
+
+
+    if (
+        locations.length >= 2
+    ) {
+
+        const previous =
+            locations[
+                locations.length - 2
+            ];
+
+
+        movementDirection =
+            calculateDirection(
+                Number(
+                    previous.latitude
+                ),
+                Number(
+                    previous.longitude
+                ),
+                Number(
+                    latest.latitude
+                ),
+                Number(
+                    latest.longitude
+                )
+            );
+    }
+
+
+    const averageSpeed =
+        duration > 0
+            ? totalDistance /
+              (
+                  duration /
+                  3600000
+              )
+            : 0;
+
+
+    /* =====================================================
+       REPORT HTML
+    ===================================================== */
+
     container.innerHTML = `
+
+        <!-- ================================================
+             REPORT HEADER
+        ================================================= -->
 
         <div class="report-header">
 
@@ -2871,84 +2976,275 @@ function generateInvestigationReport() {
                 Cyber Location Investigation Report
             </h2>
 
+
             <p>
-                <strong>Case ID:</strong>
+                <strong>
+                    Case ID:
+                </strong>
+
                 ${escapeHtml(
                     investigationCase.id
                 )}
             </p>
 
+
             <p>
-                <strong>User:</strong>
+                <strong>
+                    User:
+                </strong>
+
                 ${escapeHtml(
                     currentUser.name
                 )}
             </p>
 
+
             <p>
-                <strong>User ID:</strong>
+                <strong>
+                    User ID:
+                </strong>
+
                 ${currentUser.id}
             </p>
 
+
             <p>
-                <strong>Phone:</strong>
+                <strong>
+                    Phone:
+                </strong>
+
                 ${escapeHtml(
                     currentUser.phone
                 )}
             </p>
 
+
+            <p>
+                <strong>
+                    Report Generated:
+                </strong>
+
+                ${new Date().toLocaleString()}
+            </p>
+
+
+            <p>
+                <strong>
+                    Data Type:
+                </strong>
+
+                Fictional / Simulated
+            </p>
+
         </div>
+
+
+        <!-- ================================================
+             EVIDENCE SUMMARY
+        ================================================= -->
+
+        <h3>
+            📋 Evidence Summary
+        </h3>
 
 
         <table class="report-table">
 
             <tr>
-                <th>Total Locations</th>
-                <td>${locations.length}</td>
+                <th>
+                    Total Locations
+                </th>
+
+                <td>
+                    ${locations.length}
+                </td>
             </tr>
 
-            <tr>
-                <th>Towers Visited</th>
-                <td>${uniqueTowers}</td>
-            </tr>
 
             <tr>
-                <th>Total Distance</th>
-                <td>${totalDistance.toFixed(2)} km</td>
+                <th>
+                    Towers Visited
+                </th>
+
+                <td>
+                    ${uniqueTowers}
+                </td>
             </tr>
 
-            <tr>
-                <th>First Seen</th>
-                <td>${formatDateTime(
-                    locations[0].recorded_at
-                )}</td>
-            </tr>
 
             <tr>
-                <th>Last Seen</th>
-                <td>${formatDateTime(
-                    latest.recorded_at
-                )}</td>
+                <th>
+                    Total Distance
+                </th>
+
+                <td>
+                    ${totalDistance.toFixed(2)} km
+                </td>
             </tr>
 
-            <tr>
-                <th>Latest Tower</th>
-                <td>${escapeHtml(
-                    getTowerName(
-                        latest.tower_id
-                    )
-                )}</td>
-            </tr>
 
             <tr>
-                <th>Duration</th>
-                <td>${formatDuration(
-                    duration
-                )}</td>
+                <th>
+                    Average Speed
+                </th>
+
+                <td>
+                    ${averageSpeed.toFixed(2)} km/h
+                </td>
+            </tr>
+
+
+            <tr>
+                <th>
+                    First Seen
+                </th>
+
+                <td>
+                    ${formatDateTime(
+                        firstLocation.recorded_at
+                    )}
+                </td>
+            </tr>
+
+
+            <tr>
+                <th>
+                    Last Seen
+                </th>
+
+                <td>
+                    ${formatDateTime(
+                        latest.recorded_at
+                    )}
+                </td>
+            </tr>
+
+
+            <tr>
+                <th>
+                    Latest Tower
+                </th>
+
+                <td>
+                    ${escapeHtml(
+                        latestTowerName
+                    )}
+                </td>
+            </tr>
+
+
+            <tr>
+                <th>
+                    Latest Tower Area
+                </th>
+
+                <td>
+                    ${escapeHtml(
+                        latestTowerArea
+                    )}
+                </td>
+            </tr>
+
+
+            <tr>
+                <th>
+                    Duration
+                </th>
+
+                <td>
+                    ${formatDuration(
+                        duration
+                    )}
+                </td>
+            </tr>
+
+
+            <tr>
+                <th>
+                    Movement Direction
+                </th>
+
+                <td>
+                    ${escapeHtml(
+                        movementDirection
+                    )}
+                </td>
             </tr>
 
         </table>
 
+
+        <!-- ================================================
+             DATA SOURCE
+        ================================================= -->
+
+        <h3>
+            🗄️ Data Source & Analysis
+        </h3>
+
+
+        <table class="report-table">
+
+            <tr>
+                <th>
+                    Data Source
+                </th>
+
+                <td>
+                    PostgreSQL Database
+                </td>
+            </tr>
+
+
+            <tr>
+                <th>
+                    Record Type
+                </th>
+
+                <td>
+                    Simulated Location Logs
+                </td>
+            </tr>
+
+
+            <tr>
+                <th>
+                    Records Analyzed
+                </th>
+
+                <td>
+                    ${locations.length}
+                </td>
+            </tr>
+
+
+            <tr>
+                <th>
+                    Analysis Status
+                </th>
+
+                <td>
+                    Complete
+                </td>
+            </tr>
+
+
+            <tr>
+                <th>
+                    Data Classification
+                </th>
+
+                <td>
+                    Fictional / Educational
+                </td>
+            </tr>
+
+        </table>
+
+
+        <!-- ================================================
+             LOCATION HISTORY
+        ================================================= -->
 
         <h3>
             📍 Location History
@@ -2960,75 +3256,287 @@ function generateInvestigationReport() {
             <thead>
 
                 <tr>
-                    <th>#</th>
-                    <th>Tower</th>
-                    <th>Latitude</th>
-                    <th>Longitude</th>
-                    <th>Accuracy</th>
-                    <th>Recorded At</th>
+
+                    <th>
+                        #
+                    </th>
+
+                    <th>
+                        Tower / Area
+                    </th>
+
+                    <th>
+                        Latitude
+                    </th>
+
+                    <th>
+                        Longitude
+                    </th>
+
+                    <th>
+                        Accuracy
+                    </th>
+
+                    <th>
+                        Recorded At
+                    </th>
+
                 </tr>
 
             </thead>
 
+
             <tbody>
 
-                ${locations.map(
-                    (location, index) => `
-                        <tr>
+                ${
+                    locations
+                        .map(
+                            (
+                                location,
+                                index
+                            ) => {
 
-                            <td>
-                                ${index + 1}
-                            </td>
+                                const tower =
+                                    currentTowers.find(
+                                        item =>
+                                            String(
+                                                item.id
+                                            ) ===
+                                            String(
+                                                location.tower_id
+                                            )
+                                    );
 
-                            <td>
-                                ${escapeHtml(
-                                    getTowerName(
-                                        location.tower_id
-                                    )
-                                )}
-                            </td>
 
-                            <td>
-                                ${Number(
-                                    location.latitude
-                                ).toFixed(6)}
-                            </td>
+                                const towerName =
+                                    tower
+                                        ? tower.tower_id
+                                        : getTowerName(
+                                            location.tower_id
+                                        );
 
-                            <td>
-                                ${Number(
-                                    location.longitude
-                                ).toFixed(6)}
-                            </td>
 
-                            <td>
-                                ${location.accuracy ?? "N/A"} m
-                            </td>
+                                const towerArea =
+                                    tower
+                                        ? tower.area
+                                        : "N/A";
 
-                            <td>
-                                ${formatDate(
-                                    location.recorded_at
-                                )}
-                            </td>
 
-                        </tr>
-                    `
-                ).join("")}
+                                return `
+
+                                    <tr>
+
+                                        <td>
+                                            ${index + 1}
+                                        </td>
+
+
+                                        <td>
+
+                                            <strong>
+                                                ${escapeHtml(
+                                                    towerName
+                                                )}
+                                            </strong>
+
+                                            <br>
+
+                                            <small>
+                                                Area:
+                                                ${escapeHtml(
+                                                    towerArea
+                                                )}
+                                            </small>
+
+                                        </td>
+
+
+                                        <td>
+                                            ${Number(
+                                                location.latitude
+                                            ).toFixed(6)}
+                                        </td>
+
+
+                                        <td>
+                                            ${Number(
+                                                location.longitude
+                                            ).toFixed(6)}
+                                        </td>
+
+
+                                        <td>
+                                            ${
+                                                location.accuracy ??
+                                                "N/A"
+                                            } m
+                                        </td>
+
+
+                                        <td>
+                                            ${formatDate(
+                                                location.recorded_at
+                                            )}
+                                        </td>
+
+                                    </tr>
+
+                                `;
+                            }
+                        )
+                        .join("")
+                }
 
             </tbody>
 
         </table>
 
 
+        <!-- ================================================
+             INVESTIGATION FINDINGS
+        ================================================= -->
+
+        <div class="report-findings">
+
+            <h3>
+                🔎 Investigation Findings
+            </h3>
+
+
+            <ul>
+
+                <li>
+                    A total of
+                    <strong>
+                        ${locations.length}
+                    </strong>
+                    simulated location records
+                    were analyzed.
+                </li>
+
+
+                <li>
+                    The records represent
+                    <strong>
+                        ${uniqueTowers}
+                    </strong>
+                    unique simulated towers.
+                </li>
+
+
+                <li>
+                    Total calculated movement distance:
+                    <strong>
+                        ${totalDistance.toFixed(2)} km
+                    </strong>.
+                </li>
+
+
+                <li>
+                    Calculated average movement speed:
+                    <strong>
+                        ${averageSpeed.toFixed(2)} km/h
+                    </strong>.
+                </li>
+
+
+                <li>
+                    Overall movement direction:
+                    <strong>
+                        ${escapeHtml(
+                            movementDirection
+                        )}
+                    </strong>.
+                </li>
+
+
+                <li>
+                    Latest recorded simulated tower:
+                    <strong>
+                        ${escapeHtml(
+                            latestTowerName
+                        )}
+                    </strong>
+                    (${escapeHtml(
+                        latestTowerArea
+                    )}).
+                </li>
+
+            </ul>
+
+        </div>
+
+
+        <!-- ================================================
+             CONCLUSION
+        ================================================= -->
+
+        <div class="report-conclusion">
+
+            <h3>
+                📝 Conclusion
+            </h3>
+
+
+            <p>
+
+                Based on the available simulated
+                location records, the subject shows
+                a continuous movement pattern across
+                the analyzed simulated towers.
+
+                The calculated movement direction is
+
+                <strong>
+                    ${escapeHtml(
+                        movementDirection
+                    )}
+                </strong>
+
+                with a total calculated distance of
+
+                <strong>
+                    ${totalDistance.toFixed(2)} km
+                </strong>
+
+                during the investigation period.
+
+            </p>
+
+
+            <p>
+
+                This conclusion is generated strictly
+                from the fictional / simulated data
+                available in the educational system.
+
+                It does not represent real-world
+                mobile tracking or real subscriber
+                location information.
+
+            </p>
+
+        </div>
+
+
+        <!-- ================================================
+             DISCLAIMER
+        ================================================= -->
+
         <p class="report-warning">
+
             ⚠️ Educational simulator using
-            fictional/simulated location data.
+            fictional/simulated location data only.
+
         </p>
+
     `;
 
 
     addEvidenceLog(
         "Investigation report generated."
     );
+
 }
 
 
