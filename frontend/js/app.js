@@ -99,100 +99,375 @@ function escapeHtml(value) {
    LOGIN
 ========================================================= */
 
-const DEMO_USERNAME = "investigator";
-const DEMO_PASSWORD = "Cyber@123";
+/* =========================================================
+   LOGIN - JWT AUTHENTICATION
+========================================================= */
+
+const AUTH_TOKEN_KEY =
+    "simulator_investigator_token";
 
 
-function investigatorLogin() {
+function getAuthToken() {
+    return localStorage.getItem(
+        AUTH_TOKEN_KEY
+    );
+}
 
-    const username = el("investigatorUsername")?.value.trim();
-    const password = el("investigatorPassword")?.value;
 
-    const loginMessage = el("loginMessage");
+function clearAuthToken() {
+    localStorage.removeItem(
+        AUTH_TOKEN_KEY
+    );
+
+    localStorage.removeItem(
+        "simulator_investigator_logged_in"
+    );
+}
+
+
+function isAuthenticated() {
+    return Boolean(
+        getAuthToken()
+    );
+}
+
+
+/* =========================================================
+   AUTHENTICATED API FETCH
+========================================================= */
+
+async function apiFetch(
+    url,
+    options = {}
+) {
+
+    const token =
+        getAuthToken();
+
+    const headers =
+        new Headers(
+            options.headers || {}
+        );
+
+
+    if (token) {
+
+        headers.set(
+            "Authorization",
+            `Bearer ${token}`
+        );
+    }
+
 
     if (
-        username === DEMO_USERNAME &&
-        password === DEMO_PASSWORD
+        options.body &&
+        typeof options.body === "string" &&
+        !headers.has("Content-Type")
     ) {
+
+        headers.set(
+            "Content-Type",
+            "application/json"
+        );
+    }
+
+
+    const response =
+        await fetch(
+            url,
+            {
+                ...options,
+                headers
+            }
+        );
+
+
+    /* -----------------------------------------
+       TOKEN EXPIRED / INVALID
+    ----------------------------------------- */
+
+    if (
+        response.status === 401
+    ) {
+
+        clearAuthToken();
+
+        if (el("loginPanel")) {
+
+            el("loginPanel").style.display =
+                "flex";
+        }
+
+
+        if (el("dashboard")) {
+
+            el("dashboard").style.display =
+                "none";
+        }
+
+
+        const loginMessage =
+            el("loginMessage");
+
+
+        if (loginMessage) {
+
+            loginMessage.textContent =
+                "⚠️ Session expired. Please login again.";
+
+            loginMessage.style.color =
+                "#dc2626";
+        }
+    }
+
+
+    return response;
+}
+
+
+/* =========================================================
+   INVESTIGATOR LOGIN
+========================================================= */
+
+async function investigatorLogin() {
+
+    const username =
+        el("investigatorUsername")
+            ?.value
+            .trim() || "";
+
+
+    const password =
+        el("investigatorPassword")
+            ?.value || "";
+
+
+    const loginMessage =
+        el("loginMessage");
+
+
+    if (
+        !username ||
+        !password
+    ) {
+
+        if (loginMessage) {
+
+            loginMessage.textContent =
+                "⚠️ Username and password required.";
+
+            loginMessage.style.color =
+                "#dc2626";
+        }
+
+        return;
+    }
+
+
+    if (loginMessage) {
+
+        loginMessage.textContent =
+            "🔐 Authenticating...";
+
+        loginMessage.style.color =
+            "#2563eb";
+    }
+
+
+    try {
+
+        /* -----------------------------------------
+           PUBLIC LOGIN API
+        ----------------------------------------- */
+
+        const response =
+            await fetch(
+                `${API_URL}/api/auth/login`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        username:
+                            username,
+
+                        password:
+                            password
+                    })
+                }
+            );
+
+
+        const data =
+            await response
+                .json()
+                .catch(
+                    () => ({})
+                );
+
+
+        if (
+            !response.ok ||
+            !data.access_token
+        ) {
+
+            throw new Error(
+                data.detail ||
+                "Invalid username or password."
+            );
+        }
+
+
+        /* -----------------------------------------
+           SAVE JWT
+        ----------------------------------------- */
+
+        localStorage.setItem(
+            AUTH_TOKEN_KEY,
+            data.access_token
+        );
+
 
         localStorage.setItem(
             "simulator_investigator_logged_in",
             "true"
         );
 
+
+        /* -----------------------------------------
+           SHOW DASHBOARD
+        ----------------------------------------- */
+
         if (el("loginPanel")) {
-            el("loginPanel").style.display = "none";
+
+            el("loginPanel").style.display =
+                "none";
         }
+
 
         if (el("dashboard")) {
-            el("dashboard").style.display = "block";
+
+            el("dashboard").style.display =
+                "block";
         }
+
 
         if (loginMessage) {
-            loginMessage.textContent = "";
+
+            loginMessage.textContent =
+                "";
         }
 
+
+        /* -----------------------------------------
+           LOAD CASE + USERS
+        ----------------------------------------- */
+
         loadInvestigationCase();
-        loadUsers();
+
+        await loadUsers();
+
 
         showMessage(
             "✅ Investigator login successful."
         );
 
-    } else {
+
+    } catch (error) {
+
+        console.error(
+            "Login error:",
+            error
+        );
+
+
+        clearAuthToken();
+
 
         if (loginMessage) {
-            loginMessage.textContent =
-                "❌ Invalid username or password.";
 
-            loginMessage.style.color = "#dc2626";
+            loginMessage.textContent =
+                `❌ ${error.message}`;
+
+            loginMessage.style.color =
+                "#dc2626";
         }
     }
 }
 
 
+/* =========================================================
+   LOGOUT
+========================================================= */
+
 function investigatorLogout() {
 
-    localStorage.removeItem(
-        "simulator_investigator_logged_in"
-    );
+    clearAuthToken();
+
+    currentUser = null;
+
+    currentLocations = [];
+
+    currentTowers = [];
 
     location.reload();
 }
 
 
+/* =========================================================
+   AUTH CHECK
+========================================================= */
+
 function checkInvestigatorAuthentication() {
 
-    const loggedIn =
-        localStorage.getItem(
-            "simulator_investigator_logged_in"
-        );
+    const token =
+        getAuthToken();
 
-    if (loggedIn === "true") {
+
+    if (token) {
 
         if (el("loginPanel")) {
-            el("loginPanel").style.display = "none";
+
+            el("loginPanel").style.display =
+                "none";
         }
+
 
         if (el("dashboard")) {
-            el("dashboard").style.display = "block";
+
+            el("dashboard").style.display =
+                "block";
         }
 
+
         loadInvestigationCase();
+
         loadUsers();
+
 
     } else {
 
+        clearAuthToken();
+
+
         if (el("loginPanel")) {
-            el("loginPanel").style.display = "flex";
+
+            el("loginPanel").style.display =
+                "flex";
         }
 
+
         if (el("dashboard")) {
-            el("dashboard").style.display = "none";
+
+            el("dashboard").style.display =
+                "none";
         }
     }
 }
-
 
 /* =========================================================
    CASE ID
@@ -411,10 +686,10 @@ async function loadUsers() {
             </option>
         `;
 
-        const response =
-            await fetch(
-                `${API_URL}/api/users`
-            );
+    const response =
+        await apiFetch(
+           `${API_URL}/api/users`
+        );
 
         if (!response.ok) {
             throw new Error(
@@ -517,7 +792,7 @@ async function investigateUser(
         ----------------------------------------- */
 
         const usersResponse =
-            await fetch(
+            await apiFetch(
                 `${API_URL}/api/users`
             );
 
@@ -578,7 +853,7 @@ async function investigateUser(
         ----------------------------------------- */
 
         const locationsResponse =
-            await fetch(
+            await apiFetch(
                 `${API_URL}/api/locations/${selectedUserId}`
             );
 
@@ -606,7 +881,7 @@ async function investigateUser(
         ----------------------------------------- */
 
         const towersResponse =
-            await fetch(
+            await apiFetch(
                 `${API_URL}/api/towers`
             );
 
@@ -773,7 +1048,7 @@ async function searchInvestigationUser() {
     try {
 
         const response =
-            await fetch(
+            await apiFetch(
                 `${API_URL}/api/users`
             );
 
