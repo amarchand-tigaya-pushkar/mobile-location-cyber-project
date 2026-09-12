@@ -131,7 +131,6 @@ function isAuthenticated() {
     );
 }
 
-
 /* =========================================================
    AUTHENTICATED API FETCH
 ========================================================= */
@@ -149,7 +148,6 @@ async function apiFetch(
             options.headers || {}
         );
 
-
     if (token) {
 
         headers.set(
@@ -157,7 +155,6 @@ async function apiFetch(
             `Bearer ${token}`
         );
     }
-
 
     if (
         options.body &&
@@ -171,16 +168,20 @@ async function apiFetch(
         );
     }
 
+    /* -----------------------------------------
+       IMPORTANT:
+       यहाँ fetch() ही रहना चाहिए.
+       apiFetch() नहीं.
+    ----------------------------------------- */
 
     const response =
-        await apiFetch(
+        await fetch(
             url,
             {
                 ...options,
                 headers
             }
         );
-
 
     /* -----------------------------------------
        TOKEN EXPIRED / INVALID
@@ -198,17 +199,14 @@ async function apiFetch(
                 "flex";
         }
 
-
         if (el("dashboard")) {
 
             el("dashboard").style.display =
                 "none";
         }
 
-
         const loginMessage =
             el("loginMessage");
-
 
         if (loginMessage) {
 
@@ -220,11 +218,8 @@ async function apiFetch(
         }
     }
 
-
     return response;
 }
-
-
 /* =========================================================
    INVESTIGATOR LOGIN
 ========================================================= */
